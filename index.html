@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Red Hallway</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, sans-serif;
+}
+
+body{
+    overflow:hidden;
+    background:black;
+    color:white;
+}
+
+/* GAME AREA */
+
+#game{
+    width:100vw;
+    height:100vh;
+    position:relative;
+    overflow:hidden;
+
+    background:
+    radial-gradient(circle at center,
+    #220000 0%,
+    #050505 70%);
+}
+
+/* FLASHLIGHT */
+
+#flashlight{
+
+    position:absolute;
+
+    width:250px;
+    height:250px;
+
+    border-radius:50%;
+
+    pointer-events:none;
+
+    background:
+    radial-gradient(circle,
+    rgba(255,255,255,0.15) 0%,
+    rgba(255,255,255,0.05) 30%,
+    rgba(0,0,0,0.96) 70%);
+
+    transform:translate(-50%,-50%);
+
+    z-index:50;
+}
+
+/* TITLE */
+
+#title{
+
+    position:absolute;
+
+    top:25px;
+    width:100%;
+
+    text-align:center;
+
+    font-size:40px;
+
+    color:#ff3b3b;
+
+    letter-spacing:5px;
+
+    text-shadow:
+    0 0 10px red,
+    0 0 30px red;
+
+    z-index:100;
+}
+
+/* ROUND */
+
+#round{
+
+    position:absolute;
+
+    top:90px;
+    width:100%;
+
+    text-align:center;
+
+    font-size:24px;
+
+    color:#ddd;
+
+    z-index:100;
+}
+
+/* HALLWAY */
+
+#hallway{
+
+    position:absolute;
+
+    bottom:0;
+
+    width:100%;
+    height:80%;
+
+    display:flex;
+
+    justify-content:center;
+    align-items:center;
+
+    gap:80px;
+}
+
+/* DOORS */
+
+.door{
+
+    width:180px;
+    height:320px;
+
+    background:
+    linear-gradient(to right,
+    #2a0000,
+    #550000,
+    #2a0000);
+
+    border:4px solid #111;
+
+    position:relative;
+
+    cursor:pointer;
+
+    transition:0.3s;
+
+    box-shadow:
+    0 0 20px rgba(255,0,0,0.2);
+
+}
+
+.door:hover{
+
+    transform:scale(1.05);
+
+    box-shadow:
+    0 0 30px red;
+}
+
+/* DOOR HANDLE */
+
+.handle{
+
+    width:18px;
+    height:18px;
+
+    border-radius:50%;
+
+    background:gold;
+
+    position:absolute;
+
+    right:15px;
+    top:50%;
+}
+
+/* MESSAGE */
+
+#message{
+
+    position:absolute;
+
+    bottom:40px;
+    width:100%;
+
+    text-align:center;
+
+    font-size:28px;
+
+    color:#ff6666;
+
+    z-index:100;
+
+    text-shadow:0 0 10px red;
+}
+
+/* JUMPSCARE */
+
+#jumpscare{
+
+    position:absolute;
+
+    inset:0;
+
+    background:black;
+
+    display:none;
+
+    justify-content:center;
+    align-items:center;
+
+    flex-direction:column;
+
+    z-index:500;
+}
+
+#jumpscare img{
+
+    width:100vw;
+    height:100vh;
+
+    object-fit:cover;
+}
+
+/* GAME OVER */
+
+#gameOver{
+
+    position:absolute;
+
+    inset:0;
+
+    background:rgba(0,0,0,0.95);
+
+    display:none;
+
+    justify-content:center;
+    align-items:center;
+
+    flex-direction:column;
+
+    z-index:400;
+
+    text-align:center;
+}
+
+#gameOver h1{
+
+    font-size:80px;
+
+    color:red;
+
+    margin-bottom:20px;
+
+    text-shadow:
+    0 0 20px red;
+}
+
+#gameOver p{
+
+    font-size:30px;
+
+    margin-bottom:30px;
+}
+
+button{
+
+    padding:15px 35px;
+
+    border:none;
+
+    background:red;
+
+    color:white;
+
+    font-size:22px;
+
+    border-radius:10px;
+
+    cursor:pointer;
+
+    transition:0.3s;
+}
+
+button:hover{
+
+    transform:scale(1.1);
+}
+
+/* GLITCH EFFECT */
+
+.glitch{
+
+    animation:glitch 0.1s infinite;
+}
+
+@keyframes glitch{
+
+    0%{
+        transform:translate(2px,-2px);
+    }
+
+    25%{
+        transform:translate(-2px,2px);
+    }
+
+    50%{
+        transform:translate(2px,2px);
+    }
+
+    75%{
+        transform:translate(-2px,-2px);
+    }
+
+    100%{
+        transform:translate(0,0);
+    }
+
+}
+
+/* SHADOW FLASH */
+
+.shadow{
+
+    position:absolute;
+
+    width:200px;
+    height:300px;
+
+    background:black;
+
+    opacity:0.7;
+
+    filter:blur(10px);
+
+    display:none;
+
+    z-index:60;
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="game">
+
+    <div id="title">
+        THE RED HALLWAY
+    </div>
+
+    <div id="round">
+        Room: <span id="roomNumber">1</span>/10
+    </div>
+
+    <div id="hallway">
+
+        <div class="door" data-door="1">
+            <div class="handle"></div>
+        </div>
+
+        <div class="door" data-door="2">
+            <div class="handle"></div>
+        </div>
+
+        <div class="door" data-door="3">
+            <div class="handle"></div>
+        </div>
+
+    </div>
+
+    <div id="message">
+        Choose a door...
+    </div>
+
+    <div id="flashlight"></div>
+
+    <div class="shadow" id="shadow"></div>
+
+    <!-- GAME OVER -->
+
+    <div id="gameOver">
+
+        <h1>YOU DIED</h1>
+
+        <p>
+            The hallway consumed you.
+        </p>
+
+        <button onclick="location.reload()">
+            Restart
+        </button>
+
+    </div>
+
+    <!-- JUMPSCARE -->
+
+    <div id="jumpscare">
+
+        <img src="https://i.imgur.com/8Q2QF6V.png">
+
+    </div>
+
+</div>
+
+<script>
+
+/* ELEMENTS */
+
+const flashlight=document.getElementById("flashlight");
+
+const message=document.getElementById("message");
+
+const roomNumber=document.getElementById("roomNumber");
+
+const gameOver=document.getElementById("gameOver");
+
+const jumpscare=document.getElementById("jumpscare");
+
+const shadow=document.getElementById("shadow");
+
+const doors=document.querySelectorAll(".door");
+
+const game=document.getElementById("game");
+
+/* GAME VARIABLES */
+
+let room=1;
+
+let gameRunning=true;
+
+/* FLASHLIGHT FOLLOW */
+
+document.addEventListener("mousemove",(e)=>{
+
+    flashlight.style.left=e.clientX+"px";
+
+    flashlight.style.top=e.clientY+"px";
+
+});
+
+/* RANDOM SHADOW */
+
+setInterval(()=>{
+
+    if(!gameRunning) return;
+
+    shadow.style.display="block";
+
+    shadow.style.left=
+    Math.random()*window.innerWidth+"px";
+
+    shadow.style.top=
+    Math.random()*window.innerHeight+"px";
+
+    setTimeout(()=>{
+
+        shadow.style.display="none";
+
+    },200);
+
+},4000);
+
+/* DOOR EVENTS */
+
+doors.forEach((door)=>{
+
+    door.addEventListener("click",()=>{
+
+        if(!gameRunning) return;
+
+        let random=Math.random();
+
+        /* DEATH */
+
+        if(random<0.25){
+
+            deathEvent();
+
+        }
+
+        /* JUMPSCARE */
+
+        else if(random<0.55){
+
+            scareEvent();
+
+        }
+
+        /* SAFE */
+
+        else{
+
+            nextRoom();
+
+        }
+
+    });
+
+});
+
+/* NEXT ROOM */
+
+function nextRoom(){
+
+    room++;
+
+    roomNumber.innerText=room;
+
+    message.innerText=
+    "You survived... for now.";
+
+    flashRed();
+
+    if(room>10){
+
+        winGame();
+    }
+
+}
+
+/* SCARE EVENT */
+
+function scareEvent(){
+
+    message.innerText=
+    "Something is behind you...";
+
+    game.classList.add("glitch");
+
+    jumpscare.style.display="flex";
+
+    setTimeout(()=>{
+
+        jumpscare.style.display="none";
+
+        game.classList.remove("glitch");
+
+    },500);
+
+}
+
+/* DEATH */
+
+function deathEvent(){
+
+    gameRunning=false;
+
+    game.classList.add("glitch");
+
+    setTimeout(()=>{
+
+        gameOver.style.display="flex";
+
+    },800);
+
+}
+
+/* WIN GAME */
+
+function winGame(){
+
+    gameRunning=false;
+
+    message.innerText=
+    "YOU ESCAPED THE HALLWAY";
+
+    setTimeout(()=>{
+
+        alert("You escaped.");
+
+        location.reload();
+
+    },1000);
+
+}
+
+/* RED FLASH */
+
+function flashRed(){
+
+    document.body.animate([
+
+        {
+            background:"black"
+        },
+
+        {
+            background:"darkred"
+        },
+
+        {
+            background:"black"
+        }
+
+    ],{
+
+        duration:400
+
+    });
+
+}
+
+/* RANDOM CREEPY MESSAGES */
+
+const creepyMessages=[
+
+    "Don't turn around.",
+    "It knows you're here.",
+    "Wrong door.",
+    "Run.",
+    "Something moved.",
+    "You are not alone.",
+    "The hallway is alive."
+
+];
+
+setInterval(()=>{
+
+    if(!gameRunning) return;
+
+    message.innerText=
+    creepyMessages[
+        Math.floor(Math.random()*creepyMessages.length)
+    ];
+
+},5000);
+
+</script>
+
+</body>
+</html>
